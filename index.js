@@ -10,34 +10,48 @@ let tweets = [];
 
 
 app.post('/singup', (req,res)=>{
-   const user = req.body;
-   users.push(user);
-   res.send("OK");
+   const {username, avatar} = req.body;
+if(!username || !avatar){
+   return res.status(400).send({
+      message: "Todos os campos são obrigatórios!"
+   })
+}
+
+   users.push({username, avatar});
+   res.status(201).send("OK");
 })
 
 app.post('/tweets', (req, res)=>{
-const tweet = req.body.tweet;
-const user = req.headers.username;
+const {tweet} = req.body;
+const {user: username} = req.headers;
 
-const objTweet = {tweet, user};
+if(!tweet || !username){
+   return res.status(400).send(
+      {message:"Todos os campos são obrigatórios"}
+      );
+}else{
+   const objTweet = {tweet, username};
 tweets.push(objTweet);
-res.send("ok");
-})
+return res.status(201).send("OK");
+}
+
+});
 
 app.get('/tweets', (req,res)=>{
-   let Newtweets = [];
-   let avatar = users[0].avatar;
-   for(let i = tweets.length-1; i>tweets.length-11; i--){
-      Newtweets.push(tweets[i]);
+
+const Tweets = tweets.map(tt=>{
+   for(let i = 0; i<users.length; i++){
+      console.log(tt.username);
+      if( users[i].username === tt.username){
+         return {...tt, avatar: users[i].avatar}
+      }
    }
-   console.log(Newtweets);
-let Tweets = Newtweets.map(tt=>{
-   return {...tt, avatar: avatar}
  });
-console.log(Tweets);
-res.send(Tweets);
+ let TweetsUser = Tweets.slice(-10);
+console.log(TweetsUser.length);
+res.send(TweetsUser);
 })
 
 app.listen(5000, ()=>{
-   console.log("workinOn");
+   console.log("workinOn port 5000");
 });
